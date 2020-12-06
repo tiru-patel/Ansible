@@ -1,0 +1,79 @@
+- hosts: 192.168.1.10
+  vars:
+          - dvd_dir: "/dvd"
+          - doc_root: "/var/www/webserver"
+          - port_no: 5000
+  tasks:
+          - name: Creating Directory to mount CDROM
+            file: 
+                path: "{{ dvd_dir }}"
+                state: directory 
+
+          - name: Mounting CDROM
+            mount: 
+                path: "{{ dvd_dir }}"
+                src: "/dev/cdrom"
+                fstype: iso9660
+                state: mounted
+
+          - name: Setting AppStream URL as baseurl
+            yum_repository:
+                name: "dvd1"
+                description: "AppStream"
+                baseurl: "/dvd/AppStream"
+                gpgcheck: "no"
+
+          - name: Setting BaseOS URL as baseurl 
+            yum_repository:
+                name: "dvd2"
+                description: "BaseOS"
+                baseurl: "/dvd/BaseOS"
+                gpgcheck: "no"
+
+          - name: Installing httpd software
+            package:
+                name: "httpd"
+                state: present
+
+          - name: Creating Document Root 
+            file:
+                  path: "{{ doc_root }}"
+                  state: directory 
+              
+          - name: Copying configuration file to /etc/httpd/conf.d
+            template:
+                  dest: "/etc/httpd/conf.d/webserver.conf"
+                  src: "webserver.conf"
+
+            notify:
+                    - Copying content to new document root
+                    - Disabling SELinux
+                    - Start httpd service
+                    - Configuring Firewall to access particular port of webserver 
+
+
+  handlers:
+          - name: Copying content to new document root
+            copy:
+                  dest: "{{ doc_root }}/index.html"
+                  content: >
+                          "Configured WebServer using
+                          Ansible
+                          from Scratch"
+
+          - name: Disabling SELinux
+            ansible.posix.selinux:
+                    state: disabled
+
+          - name: Start httpd service
+            service:
+                  name: "httpd"
+                  state: restarted
+                  enabled: yes
+
+          - name: Configuring Firewall to access particular port of webserver
+            firewalld:
+                  port: "{{ port_no }}/tcp"
+                  state: enabled
+                  permanent: yes
+                  immediate: yes
