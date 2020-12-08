@@ -1,0 +1,65 @@
+- hosts: web
+  tasks:
+          - name: "Creating a directory for mounting CDROM"
+            file:
+                    path: "/dvd"
+                    state: directory 
+          - name: "Mounting CDROM"
+            mount:
+                    path: "/dvd"
+                    src: "/dev/cdrom"
+                    fstype: iso9660
+                    state: mounted
+          - name: "Configuring yum AppStream repo"
+            yum_repository:
+                    baseurl: "/dvd/AppStream"
+                    name: "dvd1"
+                    description: "yum dvd1"
+                    gpgcheck: "no"
+          - name: "Configuring yum BaseOS repo"
+            yum_repository:
+                     baseurl: "/dvd/BaseOS"
+                     name: "dvd2"
+                     description: "yum dvd2"
+                     gpgcheck: "no"
+          - name: "Install httpd"
+            package:
+                     name: "httpd"
+                     state: present
+          - name: "Install php"
+            package:
+                     name: "php"
+                     state: present
+          - name: "Copying index.php file to document root"
+            copy:
+                     dest: "/var/www/html/index.php"
+                     src: "index.php"
+          - name: "Starting service"
+            service:
+                     name: "httpd"
+                     state: restarted
+          - name: "Disabling firewall at port 8080"
+            firewalld:
+                    service: "http"
+                    permanent: yes
+                    state: enabled
+
+- hosts: haproxy
+  tasks:
+          - name: "Installing haproxy"
+            package:
+                    name: "haproxy"
+          - name: "Configuring /etc/haproxy/haproxy.cfg file"
+            template:
+                    dest: "/etc/haproxy/haproxy.cfg"
+                    src: "haproxy.cfg"
+          - name: "Starting haproxy service"
+            service:
+                    name: "haproxy"
+                    state: started            
+
+
+
+
+
+
