@@ -1,0 +1,14 @@
+---
+# tasks file for webserver
+- package:
+        name: "httpd"
+        state: present
+- package:
+        name: "php"
+        state: present
+- copy:
+        src: "templates/index.php"
+        dest: "/var/www/html"
+- service:
+        name: "httpd"
+        state: started
