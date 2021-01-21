@@ -3,7 +3,7 @@
 
 <!-- Put site-specific property overrides in this file. -->
 
-{% for i in groups["datanode" ]%}
+{% for i in groups["namenode"]%}
 <configuration>
 <property>
 <name>fs.default.name</name>
