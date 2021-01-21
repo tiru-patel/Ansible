@@ -45,12 +45,8 @@
           - name: "starting namenode service"
             command: "hadoop-daemon.sh start namenode"
 
-          - name: "open port 9001 for testing" 
-            ansible.posix.firewalld:
-                                   port: "9001/tcp"
-                                   immediate: yes
-                                   permanent: yes
-                                   state: enabled
+          - name: stopping firewall
+            command: "systemctl stop firewalld"
 
 
 - hosts: datanode
@@ -99,10 +95,6 @@
           - name: "starting datanode service"
             command: "hadoop-daemon.sh start datanode"
 
-          - name: "open port 9001"
-            ansible.posix.firewalld:
-                                   port: "9001/tcp"
-                                   immediate: yes
-                                   permanent: yes
-                                   state: enabled
+          - name: "stopping firewall"
+            command: "systemctl stop firewalld"
 
